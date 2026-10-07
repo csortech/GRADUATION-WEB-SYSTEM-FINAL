@@ -1,0 +1,20 @@
+Frontend
+HTML5: Semantic document structure for page layouts (public/staff.html, login.html).
+CSS3 & Bootstrap 5 (v5.3.0): Layout design, responsive grid, custom root variable theme styling, and UI components (cards, tables, dynamic badges).
+Bootstrap Icons (v1.11.0): Visual UI cues and action icons (bi-box-arrow-in-right, bi-check-circle-fill, etc.).
+Google Fonts (Inter): Clean typography styling.
+Vanilla JavaScript (ES6+): Client-side state rendering (renderTable, renderEntryLog), live search filtering, and DOM manipulation.
+Fetch API: Asynchronous API calls (GET /api/staff/students and POST /api/staff/check-in) for real-time dashboard updates without page reloads.
+
+Backend
+Node.js: JavaScript runtime environment.
+Express.js: Web server framework handling static file serving (via /public), authentication middleware, and RESTful routing.
+Express Session / Cookie Auth: Session management and route protection (handling redirects to /stafflogin.html upon 401 unauthorized responses).
+
+Database
+MongoDB: NoSQL document database used to store and manage persistence for student profiles, clearance states (isCleared), payment reference data (paymentStatus, referenceNo), and venue check-in logs (hasEntered, entryTime).
+Mongoose ODM: Object Data Modeling library used in Node.js to structure schemas, enforce types, and execute queries against the MongoDB database.
+Architecture & Data Interchange
+Pattern: Single Page Application (SPA) style Client-Side Rendering (CSR) via dynamic fetch execution.
+
+Data Format: JSON (application/json) payloads exchanged between the Express backend and client dashboard.
