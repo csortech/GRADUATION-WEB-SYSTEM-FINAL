@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMIN DASHBOARD</title>
+    <!-- Google Fonts (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bs-body-bg: #f8fafc;
+            --primary-dark: #0f172a;
+            --card-border-radius: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bs-body-bg);
+            color: #334155;
+            min-height: 100vh;
+        }
+
+        /* Top Navigation Bar */
+        .navbar-custom {
+            background-color: #00235b;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 16px 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--card-border-radius);
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+        }
+
+        .dashboard-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--card-border-radius);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+        }
+
+        .dashboard-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .search-box {
+            max-width: 320px;
+            position: relative;
+        }
+
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+
+        .search-box .form-control {
+            border-radius: 10px;
+            padding-left: 40px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.9rem;
+        }
+
+        .search-box .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table > :not(caption) > * > * {
+            padding: 16px 24px;
+            border-bottom-color: #f1f5f9;
+        }
+
+        .table thead {
+            background-color: #f8fafc;
+        }
+
+        .table thead th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #64748b;
+            font-weight: 700;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.15s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-badge.cleared {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-badge.pending {
+            background-color: #fef9c3;
+            color: #a16207;
+        }
+
+        .pay-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pay-badge.paid {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .pay-badge.unpaid {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn-action {
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.825rem;
+            padding: 6px 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-1px);
+        }
+
+        .student-id {
+            color: var(--primary-dark);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-custom mb-4">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand">
+                <img src="logo.png" alt="School Logo" class="brand-logo" onerror="this.onerror=null; this.src='https://via.placeholder.com/35?text=LOGO';">
+                Admin Clearance Portal
+            </span>
+            <div class="d-flex align-items-center gap-2">
+                <a href="/login.html" class="btn btn-outline-light btn-sm px-3 rounded-3 opacity-75 opacity-100-hover">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Student Portal
+                </a>
+                <a href="/admin-logout" class="btn btn-danger btn-sm px-3 rounded-3 fw-medium">
+                    <i class="bi bi-power me-1"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 pb-5">
+        
+        <!-- Summary Counters -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="stat-card d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Total Records</div>
+                        <h3 class="fw-bold mb-0 text-dark mt-1" id="totalCount">0</h3>
+                    </div>
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="stat-card d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Cleared Students</div>
+                        <h3 class="fw-bold mb-0 text-success mt-1" id="clearedCount">0</h3>
+                    </div>
+                    <div class="stat-icon bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="stat-card d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Pending Approval</div>
+                        <h3 class="fw-bold mb-0 text-warning mt-1" id="pendingCount">0</h3>
+                    </div>
+                    <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+
+            <!-- SEARCH FILTER -->
+            <div class="dashboard-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <h5 class="fw-bold text-dark mb-1">Student Clearance Directory</h5>
+                </div>
+                <div class="search-box">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search student or ID..." onkeyup="filterStudents()">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Full Name</th>
+                            <th>Course</th>
+                            <th>Email Address</th>
+                            <th>Payment Status</th>
+                            <th>Clearance Status</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTable">
+
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- EMPTY SEARCH STATE -->
+            <div id="emptyState" class="text-center py-5" style="display: none;">
+                <i class="bi bi-search text-muted fs-1 mb-2"></i>
+                <h6 class="fw-bold text-secondary">No matching student records found</h6>
+                <p class="text-muted small mb-0">Try adjusting your search terms.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let globalStudentsList = [];
+
+        async function loadStudents() {
+            try {
+                const response = await fetch('/api/admin/students');
+
+                if (response.status === 401 || response.redirected) {
+                    window.location.href = '/adminlogin.html';
+                    return;
+                }
+
+                globalStudentsList = await response.json();
+                updateCounters(globalStudentsList);
+                renderTable(globalStudentsList);
+            } catch (error) {
+                console.error("Failed to fetch students:", error);
+            }
+        }
+
+        function updateCounters(students) {
+            const total = students.length;
+            const cleared = students.filter(s => s.isCleared).length;
+            const pending = total - cleared;
+
+            document.getElementById('totalCount').innerText = total;
+            document.getElementById('clearedCount').innerText = cleared;
+            document.getElementById('pendingCount').innerText = pending;
+        }
+
+        function renderTable(students) {
+            const tbody = document.getElementById('studentTable');
+            const emptyState = document.getElementById('emptyState');
+            tbody.innerHTML = '';
+
+            if (students.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            } else {
+                emptyState.style.display = 'none';
+            }
+
+            students.forEach(student => {
+                const isCleared = student.isCleared;
+                const isPaid = student.paymentStatus === 'Paid';
+
+                const statusBadge = isCleared 
+                    ? `<span class="status-badge cleared"><i class="bi bi-check-circle-fill"></i> CLEARED</span>` 
+                    : `<span class="status-badge pending"><i class="bi bi-clock-fill"></i> PENDING</span>`;
+
+                const paymentBadge = isPaid
+                    ? `<span class="pay-badge paid" title="Ref: ${student.referenceNo}"><i class="bi bi-credit-card-2-front-fill"></i> PAID</span>`
+                    : `<span class="pay-badge unpaid"><i class="bi bi-x-circle-fill"></i> UNPAID</span>`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="student-id">${student.studentId}</span></td>
+                        <td class="fw-medium text-dark">${student.fullName}</td>
+                        <td class="text-secondary">${student.course || 'N/A'}</td>
+                        <td class="text-secondary small">${student.email}</td>
+                        <td>${paymentBadge}</td>
+                        <td>${statusBadge}</td>
+                        <td class="text-end pe-4">
+                            <div class="d-inline-flex gap-2">
+                                <button class="btn btn-success btn-action" onclick="setClearance('${student.id}', true)" title="Approve Clearance">
+                                    <i class="bi bi-check-lg"></i> Approve
+                                </button>
+                                <button class="btn btn-outline-warning text-dark btn-action" onclick="setClearance('${student.id}', false)" title="Mark Pending">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Pending
+                                </button>
+                                <button class="btn btn-outline-danger btn-action" onclick="deleteStudent('${student.id}', '${student.fullName}')" title="Delete Account">
+                                    <i class="bi bi-trash3"></i> Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function filterStudents() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = globalStudentsList.filter(s => 
+                s.studentId.toLowerCase().includes(searchTerm) ||
+                s.fullName.toLowerCase().includes(searchTerm) ||
+                s.email.toLowerCase().includes(searchTerm) ||
+                (s.paymentStatus && s.paymentStatus.toLowerCase().includes(searchTerm)) ||
+                (s.course && s.course.toLowerCase().includes(searchTerm))
+            );
+            renderTable(filtered);
+        }
+
+        async function setClearance(id, status) {
+            await fetch('/api/admin/set-clearance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, isCleared: status })
+            });
+            loadStudents();
+        }
+
+        async function deleteStudent(id, name) {
+            if (confirm(`Are you sure you want to permanently delete the account for ${name}?`)) {
+                const response = await fetch(`/api/admin/student/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                if (result.success) {
+                    loadStudents();
+                } else {
+                    alert(result.message || 'Failed to delete student.');
+                }
+            }
+        }
+
+        loadStudents();
+    </script>
+</body>
+</html>
