@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STAFF ENTRY DASHBOARD</title>
+    <!-- FONTS FROM GOOGLE -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- BOOTSTRAP CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bs-body-bg: #f8fafc;
+            --primary-dark: #0f172a;
+            --card-border-radius: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bs-body-bg);
+            color: #334155;
+            min-height: 100vh;
+        }
+
+        .navbar-custom {
+            background-color: #00235b;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 16px 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--card-border-radius);
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+        }
+
+        .dashboard-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--card-border-radius);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+        }
+
+        .dashboard-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .search-box {
+            max-width: 320px;
+            position: relative;
+        }
+
+        .search-box .form-control {
+            border-radius: 10px;
+            padding-left: 40px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.9rem;
+        }
+
+        .search-box .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .table > :not(caption) > * > * {
+            padding: 14px 18px;
+            border-bottom-color: #f1f5f9;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-badge.cleared {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-badge.pending {
+            background-color: #fef9c3;
+            color: #a16207;
+        }
+
+        .pay-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pay-badge.paid {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .pay-badge.unpaid {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn-action {
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+        }
+
+        .entry-log-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--card-border-radius);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03);
+            height: 100%;
+        }
+
+        .entry-list-wrapper {
+            max-height: 520px;
+            overflow-y: auto;
+        }
+
+        .entry-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-custom mb-4">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand">
+                STAFF ENTRY DASHBOARD
+            </span>
+            <div class="d-flex align-items-center gap-2">
+                <a href="/login.html" class="btn btn-outline-light btn-sm px-3 rounded-3 opacity-75">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Student Portal
+                </a>
+                <a href="/staff-logout" class="btn btn-danger btn-sm px-3 rounded-3 fw-medium">
+                    <i class="bi bi-power me-1"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 pb-5">
+        
+        <!-- Summary Counters -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="stat-card d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Total Registered</div>
+                        <h3 class="fw-bold mb-0 text-dark mt-1" id="totalCount">0</h3>
+                    </div>
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="stat-card d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Cleared Students</div>
+                        <h3 class="fw-bold mb-0 text-success mt-1" id="clearedCount">0</h3>
+                    </div>
+                    <div class="stat-icon bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="stat-card d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Total Entered Today</div>
+                        <h3 class="fw-bold mb-0 text-info mt-1" id="enteredCount">0</h3>
+                    </div>
+                    <div class="stat-icon bg-info bg-opacity-10 text-info">
+                        <i class="bi bi-door-open-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- STUDENT TABLE -->
+            <div class="col-12 col-lg-8">
+                <div class="dashboard-card">
+                    <div class="dashboard-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                        <h5 class="fw-bold text-dark mb-0">Student Entry Verification</h5>
+                        <div class="search-box">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" id="searchInput" class="form-control" placeholder="Search student or ID..." onkeyup="filterStudents()">
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Full Name</th>
+                                    <th>Course</th>
+                                    <th>Payment</th>
+                                    <th>Clearance</th>
+                                    <th class="text-end pe-4">Venue Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTable"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="emptyState" class="text-center py-5" style="display: none;">
+                        <i class="bi bi-search text-muted fs-1 mb-2"></i>
+                        <h6 class="fw-bold text-secondary">No matching student records found</h6>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ENTRY LOG -->
+            <div class="col-12 col-lg-4">
+                <div class="entry-log-card">
+                    <div class="dashboard-header bg-light d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold text-dark mb-0"><i class="bi bi-clock-history me-2 text-primary"></i> Live Entry Log</h6>
+                        <span class="badge bg-primary rounded-pill" id="logBadge">0 Today</span>
+                    </div>
+
+                    <div class="entry-list-wrapper" id="entryLogList">
+                        <div class="text-center text-muted py-5" id="noEntryState">
+                            <i class="bi bi-person-walking fs-1 d-block mb-2"></i>
+                            <small>No student entry recorded yet.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let globalStudentsList = [];
+
+        async function loadStudents() {
+            try {
+                const response = await fetch('/api/staff/students');
+                if (response.status === 401 || response.redirected) {
+                    window.location.href = '/stafflogin.html';
+                    return;
+                }
+
+                globalStudentsList = await response.json();
+                updateCounters();
+                renderTable(globalStudentsList);
+                renderEntryLog();
+            } catch (error) {
+                console.error("Failed to fetch students:", error);
+            }
+        }
+
+        function updateCounters() {
+            const total = globalStudentsList.length;
+            const cleared = globalStudentsList.filter(s => s.isCleared).length;
+            const entered = globalStudentsList.filter(s => s.hasEntered).length;
+
+            document.getElementById('totalCount').innerText = total;
+            document.getElementById('clearedCount').innerText = cleared;
+            document.getElementById('enteredCount').innerText = entered;
+            document.getElementById('logBadge').innerText = `${entered} Today`;
+        }
+
+        function renderTable(students) {
+            const tbody = document.getElementById('studentTable');
+            const emptyState = document.getElementById('emptyState');
+            tbody.innerHTML = '';
+
+            if (students.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            } else {
+                emptyState.style.display = 'none';
+            }
+
+            students.forEach(student => {
+                const isCleared = student.isCleared;
+                const isPaid = student.paymentStatus === 'Paid';
+
+                const statusBadge = isCleared 
+                    ? `<span class="status-badge cleared"><i class="bi bi-check-circle-fill"></i> CLEARED</span>` 
+                    : `<span class="status-badge pending"><i class="bi bi-clock-fill"></i> PENDING</span>`;
+
+                const paymentBadge = isPaid
+                    ? `<span class="pay-badge paid" title="Ref: ${student.referenceNo}"><i class="bi bi-credit-card-2-front-fill"></i> PAID</span>`
+                    : `<span class="pay-badge unpaid"><i class="bi bi-x-circle-fill"></i> UNPAID</span>`;
+
+
+                const entryBtn = student.hasEntered 
+                    ? `<span class="badge bg-light text-dark border"><i class="bi bi-check-all text-success me-1"></i> Entered</span>`
+                    : `<button class="btn btn-primary btn-action" onclick="checkInStudent('${student.id}')">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Entry
+                       </button>`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="fw-bold text-dark">${student.studentId}</span></td>
+                        <td class="fw-medium text-dark">${student.fullName}</td>
+                        <td class="text-secondary small">${student.course || 'N/A'}</td>
+                        <td>${paymentBadge}</td>
+                        <td>${statusBadge}</td>
+                        <td class="text-end pe-4">
+                            ${entryBtn}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderEntryLog() {
+            const logContainer = document.getElementById('entryLogList');
+            const enteredStudents = globalStudentsList.filter(s => s.hasEntered);
+
+            if (enteredStudents.length === 0) {
+                logContainer.innerHTML = `
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-person-walking fs-1 d-block mb-2"></i>
+                        <small>No student entry recorded yet.</small>
+                    </div>
+                `;
+                return;
+            }
+
+            logContainer.innerHTML = enteredStudents.map(student => `
+                <div class="entry-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-semibold text-dark small">${student.fullName}</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">ID: ${student.studentId}</div>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-light text-dark border fw-medium mb-1 d-block" style="font-size: 0.7rem;">
+                            <i class="bi bi-clock me-1 text-primary"></i>${student.entryTime || 'Just now'}
+                        </span>
+                        <small class="${student.isCleared ? 'text-success fw-semibold' : 'text-danger'}" style="font-size: 0.7rem;">
+                            ${student.isCleared ? 'Cleared Graduate' : 'Pending Clearance'}
+                        </small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function checkInStudent(id) {
+            try {
+                const res = await fetch('/api/staff/check-in', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    loadStudents();
+                } else {
+                    alert(result.message || "Entry failed");
+                }
+            } catch (err) {
+                console.error("Check-in error:", err);
+            }
+        }
+
+        function filterStudents() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = globalStudentsList.filter(s => 
+                s.studentId.toLowerCase().includes(searchTerm) ||
+                s.fullName.toLowerCase().includes(searchTerm) ||
+                s.email.toLowerCase().includes(searchTerm) ||
+                (s.paymentStatus && s.paymentStatus.toLowerCase().includes(searchTerm)) ||
+                (s.course && s.course.toLowerCase().includes(searchTerm))
+            );
+            renderTable(filtered);
+        }
+
+        loadStudents();
+    </script>
+</body>
+</html>
