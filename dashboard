@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUDENT DASHBOARD</title>
+    <!-- Google fonts and Bootstrap-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bs-body-bg: #f8fafc;
+            --primary-brand: #180054;
+            --card-border-radius: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bs-body-bg);
+            color: #334155;
+            min-height: 100vh;
+        }
+
+        .navbar-custom {
+            background-color: var(--primary-brand);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 14px 0;
+        }
+
+        .navbar-brand img {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+        }
+
+        .custom-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--card-border-radius);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+        }
+
+        .hero-profile-card {
+            position: relative;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--card-border-radius);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03);
+        }
+
+        .hero-profile-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: var(--primary-brand);
+            border-top-left-radius: var(--card-border-radius);
+            border-bottom-left-radius: var(--card-border-radius);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        .status-badge.cleared {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-badge.pending {
+            background-color: #fef9c3;
+            color: #a16207;
+        }
+
+        .status-badge.checking {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+
+        .alert-custom-warning {
+            background-color: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #92400e;
+            border-radius: 12px;
+        }
+
+        .alert-custom-success {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            border-radius: 12px;
+        }
+
+        /* QR CODE */
+        .pass-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .pass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+        }
+
+        .qr-frame {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px;
+            display: inline-block;
+        }
+
+        .form-control, .form-control:focus {
+            border-radius: 10px;
+            border-color: #cbd5e1;
+            box-shadow: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-brand);
+        }
+
+        .btn-brand {
+            background-color: var(--primary-brand);
+            color: #ffffff;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-brand:hover {
+            background-color: #24027a;
+            color: #ffffff;
+        }
+
+        /* Transaction History */
+        .table-custom th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #64748b;
+            font-weight: 700;
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-4">
+        <div class="container px-4">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
+                <img src="/logo.png" alt="School Logo" class="rounded-circle bg-white p-1 shadow-sm" onerror="this.onerror=null; this.src='https://via.placeholder.com/38?text=NU';">
+                <span class="tracking-wide fs-6">STUDENT DASHBOARD</span>
+            </a>
+            <a href="/logout" class="btn btn-outline-light btn-sm px-3 rounded-pill fw-medium opacity-75 opacity-100-hover">
+                <i class="bi bi-box-arrow-right me-1"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-4 pb-5" style="max-width: 850px;">
+        
+
+        <div class="hero-profile-card mb-4 p-4">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                <div class="ps-2">
+                    <h3 class="fw-bold text-dark mb-1" id="studentName">Welcome, Student</h3>
+                    <p class="text-muted mb-1 small">Student ID: <span id="studentId" class="fw-semibold text-dark">---</span></p>
+                    <p class="text-muted mb-1 small">Course: <span id="studentCourse" class="fw-semibold text-dark">---</span></p>
+                    <p class="text-muted mb-0 small">Email: <span id="studentEmail" class="text-secondary">---</span></p>
+                </div>
+                <div>
+                    <span class="status-badge checking" id="headerStatusBadge">
+                        <i class="bi bi-arrow-repeat spin"></i> Checking Status...
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clearance Status -->
+        <div class="custom-card mb-4">
+            <div class="card-header bg-white border-bottom px-4 py-3">
+                <h5 class="mb-0 text-dark fw-bold fs-6"><i class="bi bi-shield-check text-primary me-2"></i>Graduation Clearance & Passes</h5>
+            </div>
+            <div class="card-body p-4">
+
+                <!-- PENDING STATUS AT PAYMENT SECTION -->
+                <div id="pendingContainer" class="d-none">
+                    <div class="alert-custom-warning p-4 text-center mb-4" role="alert">
+                        <h4 class="alert-heading fw-bold fs-5 mb-2"><i class="bi bi-clock-history me-1"></i> Status: PENDING CLEARANCE</h4>
+                        <p class="mb-0 small">Please settle your graduation fee below to complete your clearance processing.</p>
+                    </div>
+
+                    <!-- Payment Option Box -->
+                    <div class="card border border-primary-subtle bg-light p-4 text-center shadow-none rounded-4">
+                        <div class="mb-2">
+                            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold">Graduation Fee</span>
+                        </div>
+                        <h4 class="fw-bold text-dark mb-1">₱1,500.00</h4>
+                        <p class="text-muted small mb-3">Covers diploma, transcript processing, and ceremony access.</p>
+                        <div>
+                            <a href="/pay" class="btn btn-success fw-bold px-4 py-2 rounded-pill shadow-sm">
+                                <i class="bi bi-wallet2 me-2"></i> Pay via GCash / Maya
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CLEARED STATUS WITH QR CODE SECTION -->
+                <div id="clearedContainer" class="d-none">
+                    <div class="alert-custom-success p-4 text-center mb-4" role="alert">
+                        <h4 class="alert-heading fw-bold fs-5 mb-2"><i class="bi bi-check-circle-fill me-1"></i> Status: CONFIRMED GRADUATING</h4>
+                        <p class="mb-0 small">Congratulations! You are cleared for graduation. Access your entry passes below.</p>
+                    </div>
+
+                    <div class="row g-4">
+
+                        <!-- STUDENT PASS -->
+                        <div class="col-md-6">
+                            <div class="pass-card h-100 text-center p-4">
+                                <h6 class="fw-bold text-success mb-3"><i class="bi bi-person-badge me-1"></i> Student Entry Pass</h6>
+                                <div id="studentQrContainer" class="mb-3">
+                                    <div class="qr-frame">
+                                        <img id="studentQrImage" src="" alt="Student QR Code" class="img-fluid rounded" style="max-width: 160px;">
+                                    </div>
+                                </div>
+                                <div class="bg-light p-3 rounded-3 text-start border small">
+                                    <div class="text-truncate mb-1"><strong>Name:</strong> <span id="qrStudentName" class="text-secondary"></span></div>
+                                    <div class="text-truncate mb-1"><strong>ID No:</strong> <span id="qrStudentId" class="text-secondary"></span></div>
+                                    <div class="text-truncate"><strong>Course:</strong> <span id="qrStudentCourse" class="text-secondary"></span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- GUEST PASS -->
+                        <div class="col-md-6">
+                            <div class="pass-card h-100 text-center p-4 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h6 class="fw-bold text-primary mb-1"><i class="bi bi-people me-1"></i> Companion Pass (1 Guest)</h6>
+                                    <p class="text-muted small mb-3">Enter parent/guardian full name to generate guest pass.</p>
+                                    
+                                    <div class="mb-2">
+                                        <input type="text" id="companionNameInput" class="form-control form-control-sm text-center" placeholder="e.g. Maria Dela Cruz (Mother)">
+                                    </div>
+                                    <button class="btn btn-brand btn-sm w-100 py-2 mb-3 fw-bold shadow-sm" onclick="generateCompanionQR()">
+                                        <i class="bi bi-qr-code me-1"></i> Generate Companion QR
+                                    </button>
+                                </div>
+
+                                <div id="companionQrCard" class="d-none text-center">
+                                    <div class="qr-frame mb-2">
+                                        <img id="companionQrImage" src="" alt="Companion QR Code" class="img-fluid rounded" style="max-width: 140px;">
+                                    </div>
+                                    <div class="bg-light p-2 rounded-3 text-start border small">
+                                        <div class="text-truncate"><strong>Guest:</strong> <span id="companionDisplayName" class="text-secondary"></span></div>
+                                        <div class="text-truncate"><strong>For:</strong> <span id="companionStudentRef" class="text-secondary"></span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TRANSACTION HISTORY CARD -->
+        <div class="custom-card">
+            <div class="card-header bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-dark fw-bold fs-6"><i class="bi bi-receipt text-primary me-2"></i>Transaction & Clearance History</h5>
+                <span class="badge bg-light text-secondary border px-2 py-1 small fw-normal">Activity Log</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-custom align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Date / Time</th>
+                            <th>Description</th>
+                            <th>Reference No.</th>
+                            <th>Amount</th>
+                            <th class="text-end pe-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionTableBody">
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4 small">Loading transaction logs...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS AGAIN-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let currentStudent = null;
+
+        async function fetchStudentDashboard() {
+            try {
+                const response = await fetch('/api/student/me');
+
+                if (response.status === 401 || response.redirected) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                const data = await response.json();
+                currentStudent = data.student;
+
+                // for header infos
+                document.getElementById('studentName').innerText = `Welcome, ${data.student.fullName}`;
+                document.getElementById('studentId').innerText = data.student.studentId;
+                document.getElementById('studentCourse').innerText = data.student.course || 'N/A';
+                document.getElementById('studentEmail').innerText = data.student.email;
+
+                const statusBadge = document.getElementById('headerStatusBadge');
+
+                if (data.student.isCleared) {
+                    statusBadge.className = 'status-badge cleared';
+                    statusBadge.innerHTML = '<i class="bi bi-check-circle-fill"></i> CLEARED';
+
+                    document.getElementById('clearedContainer').classList.remove('d-none');
+                    document.getElementById('pendingContainer').classList.add('d-none');
+
+                    // Student QR details
+                    document.getElementById('studentQrImage').src = data.qrImageBase64;
+                    document.getElementById('qrStudentName').innerText = data.student.fullName;
+                    document.getElementById('qrStudentId').innerText = data.student.studentId;
+                    document.getElementById('qrStudentCourse').innerText = data.student.course || 'N/A';
+                } else {
+                    statusBadge.className = 'status-badge pending';
+                    statusBadge.innerHTML = '<i class="bi bi-clock-fill"></i> PENDING';
+
+                    document.getElementById('pendingContainer').classList.remove('d-none');
+                    document.getElementById('clearedContainer').classList.add('d-none');
+                }
+
+                // transaction history
+                fetchTransactionHistory();
+
+            } catch (err) {
+                console.error("Error fetching student profile:", err);
+            }
+        }
+
+        async function fetchTransactionHistory() {
+            const tbody = document.getElementById('transactionTableBody');
+            try {
+                const res = await fetch('/api/student/transactions');
+                if (!res.ok) throw new Error('Failed to load transactions');
+                const txData = await res.json();
+
+                tbody.innerHTML = '';
+                if (!txData || txData.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4 small">No transaction history recorded yet.</td></tr>`;
+                    return;
+                }
+
+                txData.forEach(tx => {
+                    const statusClass = tx.status.toLowerCase() === 'success' || tx.status.toLowerCase() === 'completed' ? 'bg-success bg-opacity-10 text-success' : 'bg-warning bg-opacity-10 text-warning';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="ps-4 text-secondary small">${tx.date || '---'}</td>
+                            <td class="fw-medium text-dark small">${tx.description || 'Graduation Fee Payment'}</td>
+                            <td class="text-secondary small font-monospace">${tx.referenceNo || 'N/A'}</td>
+                            <td class="fw-semibold text-dark small">${tx.amount ? '₱' + Number(tx.amount).toLocaleString('en-PH', {minimumFractionDigits: 2}) : '₱1,500.00'}</td>
+                            <td class="text-end pe-4"><span class="badge ${statusClass} px-2 py-1 rounded-pill">${tx.status}</span></td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                // PAYMENT DEMO
+                tbody.innerHTML = `
+                    <tr>
+                        <td class="ps-4 text-secondary small">${new Date().toLocaleDateString()}</td>
+                        <td class="fw-medium text-dark small">Graduation Fee Assessment</td>
+                        <td class="text-secondary small font-monospace">REF-PENDING</td>
+                        <td class="fw-semibold text-dark small">₱1,500.00</td>
+                        <td class="text-end pe-4"><span class="badge bg-warning bg-opacity-10 text-warning px-2 py-1 rounded-pill">Unpaid</span></td>
+                    </tr>
+                `;
+            }
+        }
+
+        async function generateCompanionQR() {
+            const guestName = document.getElementById('companionNameInput').value.trim();
+            if (!guestName) {
+                alert("Please enter the guest/companion's full name first.");
+                return;
+            }
+
+            const response = await fetch('/api/student/companion-qr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ companionName: guestName })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                document.getElementById('companionQrImage').src = data.companionQrBase64;
+                document.getElementById('companionDisplayName').innerText = guestName;
+                document.getElementById('companionStudentRef').innerText = `${currentStudent.fullName} (${currentStudent.studentId})`;
+                document.getElementById('companionQrCard').classList.remove('d-none');
+            }
+        }
+
+        fetchStudentDashboard();
+    </script>
+</body>
+</html>
