@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Portal - Create Account</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+        }
+
+        .login-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            background: #ffffff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .school-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+
+        .form-floating > .form-control,
+        .form-floating > .form-select {
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .form-floating > .form-control:focus,
+        .form-floating > .form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        }
+
+        .btn-primary {
+            padding: 12px;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+        }
+
+        .divider {
+            border-top: 1px solid #eeeeee;
+        }
+
+        .portal-badge {
+            background-color: #eef2ff;
+            color: #4f46e5;
+            font-weight: 600;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .toggle-password:hover {
+            color: #0d6efd;
+        }
+
+        .password-feedback {
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" style="max-width: 520px;">
+        <div class="card login-card p-4 p-sm-5">
+            
+
+            <div class="text-center mb-3">
+                <img src="logo.png" alt="School Logo" class="school-logo mb-3" onerror="this.onerror=null; this.src='https://via.placeholder.com/80?text=LOGO';">
+                <br>
+                <span class="portal-badge mb-2">Graduation Clearance Portal</span>
+                <h4 class="fw-bold text-dark mt-2 mb-1">Create Account</h4>
+                <p class="text-muted small">Enter your details to register for clearance</p>
+            </div>
+
+            <!-- Signup Form -->
+            <form action="/api/signup" method="POST" id="signupForm">
+
+                <!-- FIRST AND LAST NAME -->
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" name="firstName" class="form-control" id="floatingFirstName" placeholder="Juan" required>
+                            <label for="floatingFirstName" class="text-muted">
+                                <i class="bi bi-person me-1"></i> First Name
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" name="lastName" class="form-control" id="floatingLastName" placeholder="Dela Cruz" required>
+                            <label for="floatingLastName" class="text-muted">
+                                <i class="bi bi-person-fill me-1"></i> Last Name
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Student ID Input -->
+                <div class="form-floating mb-3">
+                    <input type="text" name="studentId" class="form-control" id="floatingStudentId" placeholder="2024-0001" required>
+                    <label for="floatingStudentId" class="text-muted">
+                        <i class="bi bi-card-heading me-1"></i> Student ID
+                    </label>
+                </div>
+
+                <!-- Course Dropdown Select -->
+                <div class="form-floating mb-3">
+                    <select name="course" class="form-select" id="floatingCourse" required aria-label="Select Course">
+                        <option value="" disabled selected hidden>Select your program</option>
+                        <option value="BS Information Technology">BS Information Technology (BSIT)</option>
+                        <option value="BS Computer Science">BS Computer Science (BSCS)</option>
+                        <option value="BS Business Administration">BS Business Administration (BSBA)</option>
+                        <option value="BS Accountancy">BS Accountancy (BSA)</option>
+                        <option value="BS Hospitality Management">BS Hospitality Management (BSHM)</option>
+                        <option value="BS Civil Engineering">BS Civil Engineering (BSCE)</option>
+                    </select>
+                    <label for="floatingCourse" class="text-muted">
+                        <i class="bi bi-journal-bookmark me-1"></i> Course / Program
+                    </label>
+                </div>
+
+
+                <div class="form-floating mb-3">
+                    <input type="email" name="email" class="form-control" id="floatingEmail" placeholder="student@school.edu.ph" required>
+                    <label for="floatingEmail" class="text-muted">
+                        <i class="bi bi-envelope me-1"></i> School Email
+                    </label>
+                </div>
+
+
+                <div class="password-container mb-3">
+                    <div class="form-floating">
+                        <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" required>
+                        <label for="floatingPassword" class="text-muted">
+                            <i class="bi bi-lock me-1"></i> Password
+                        </label>
+                    </div>
+                    <button type="button" class="toggle-password" id="togglePasswordBtn">
+                        <i class="bi bi-eye" id="toggleIcon"></i>
+                    </button>
+                </div>
+
+
+                <div class="password-container mb-3">
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="floatingConfirmPassword" placeholder="Confirm Password" required>
+                        <label for="floatingConfirmPassword" class="text-muted">
+                            <i class="bi bi-lock-fill me-1"></i> Confirm Password
+                        </label>
+                    </div>
+                    <button type="button" class="toggle-password" id="toggleConfirmPasswordBtn">
+                        <i class="bi bi-eye" id="toggleConfirmIcon"></i>
+                    </button>
+                    <div id="passwordMatchFeedback" class="password-feedback fw-medium"></div>
+                </div>
+
+
+                <button type="submit" class="btn btn-primary w-100 mb-3" id="submitBtn">
+                    Register Account <i class="bi bi-arrow-right-short ms-1"></i>
+                </button>
+            </form>
+
+            <div class="divider my-3"></div>
+
+            <p class="text-center small text-muted mb-0">
+                Already have an account? 
+                <a href="/login.html" class="text-decoration-none fw-semibold">Sign in here</a>
+            </p>
+
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // PASSWORDDDD
+        const passwordInput = document.getElementById('floatingPassword');
+        const confirmPasswordInput = document.getElementById('floatingConfirmPassword');
+        
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+        const toggleIcon = document.getElementById('toggleIcon');
+        
+        const toggleConfirmPasswordBtn = document.getElementById('toggleConfirmPasswordBtn');
+        const toggleConfirmIcon = document.getElementById('toggleConfirmIcon');
+
+        togglePasswordBtn.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            toggleIcon.classList.toggle('bi-eye');
+            toggleIcon.classList.toggle('bi-eye-slash');
+        });
+
+        toggleConfirmPasswordBtn.addEventListener('click', function () {
+            const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPasswordInput.setAttribute('type', type);
+            toggleConfirmIcon.classList.toggle('bi-eye');
+            toggleConfirmIcon.classList.toggle('bi-eye-slash');
+        });
+
+        // password matching
+        const feedback = document.getElementById('passwordMatchFeedback');
+        const signupForm = document.getElementById('signupForm');
+
+        function checkPasswordMatch() {
+            const pass = passwordInput.value;
+            const confirmPass = confirmPasswordInput.value;
+
+            if (!confirmPass) {
+                feedback.textContent = '';
+                confirmPasswordInput.classList.remove('is-invalid', 'is-valid');
+                return true;
+            }
+
+            if (pass === confirmPass) {
+                feedback.textContent = 'Passwords match!';
+                feedback.className = 'password-feedback text-success fw-medium';
+                confirmPasswordInput.classList.remove('is-invalid');
+                confirmPasswordInput.classList.add('is-valid');
+                return true;
+            } else {
+                feedback.textContent = 'Passwords do not match.';
+                feedback.className = 'password-feedback text-danger fw-medium';
+                confirmPasswordInput.classList.remove('is-valid');
+                confirmPasswordInput.classList.add('is-invalid');
+                return false;
+            }
+        }
+
+        passwordInput.addEventListener('input', checkPasswordMatch);
+        confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+        signupForm.addEventListener('submit', function (e) {
+            if (!checkPasswordMatch()) {
+                e.preventDefault();
+                confirmPasswordInput.focus();
+            }
+        });
+    </script>
+</body>
+</html>
