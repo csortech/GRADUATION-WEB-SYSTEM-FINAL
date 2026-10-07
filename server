@@ -1,0 +1,534 @@
+const express = require('express');
+const session = require('express-session');
+const QRCode = require('qrcode');
+const path = require('path');
+const mongoose = require('mongoose');
+
+const app = express();
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static('public'));
+
+app.use(session({
+    secret: 'school_secret_key_123',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 3600000 }
+}));
+
+// ==========================================
+// MONGODB CONNECTION
+// ==========================================
+const MONGO_URI = 'mongodb://127.0.0.1:27017/graduation_clearance';
+
+mongoose.connect(MONGO_URI)
+    .then(() => console.log('Connected successfully to MongoDB'))
+    .catch(err => console.error('MongoDB connection error:', err));
+
+// ==========================================
+// SCHEMAS & MODELS
+// ==========================================
+const studentSchema = new mongoose.Schema({
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    fullName: { type: String, required: true },
+    studentId: { type: String, required: true, unique: true },
+    course: { type: String, required: true },
+    isCleared: { type: Boolean, default: false },
+    hasEntered: { type: Boolean, default: false },
+    entryTime: { type: String, default: null }
+}, { timestamps: true });
+
+const transactionSchema = new mongoose.Schema({
+    studentId: { type: String, required: true },
+    description: { type: String, required: true },
+    referenceNo: { type: String, required: true },
+    amount: { type: Number, required: true },
+    status: { type: String, enum: ['Paid', 'Unpaid'], default: 'Unpaid' },
+    date: { type: String, required: true }
+}, { timestamps: true });
+
+const Student = mongoose.model('Student', studentSchema);
+const Transaction = mongoose.model('Transaction', transactionSchema);
+
+// Portal System Credentials
+const ADMIN_USER = { username: "admin", password: "admin123" };
+const STAFF_USER = { username: "staff", password: "staff123" };
+
+// ==========================================
+// MIDDLEWARES
+// ==========================================
+function requireStudentLogin(req, res, next) {
+    if (req.session && req.session.user) return next();
+    res.redirect('/login.html');
+}
+
+function requireAdminLogin(req, res, next) {
+    if (req.session && req.session.isAdmin) return next();
+    res.redirect('/adminlogin.html');
+}
+
+function requireStaffLogin(req, res, next) {
+    if (req.session && (req.session.isStaff || req.session.isAdmin)) return next();
+    res.redirect('/stafflogin.html');
+}
+
+function getCurrentFormattedDate() {
+    return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function getCurrentFormattedTime() {
+    return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+
+// STAFF ROUTES & AUTHENTICATION
+
+
+app.get('/stafflogin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'stafflogin.html'));
+});
+
+// Serve Staff Dashboard Page (Protected)
+app.get('/staff', requireStaffLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'staff.html'));
+});
+
+// Staff Authentication POST Endpoint
+app.post('/api/staff/login', (req, res) => {
+    const { username, password } = req.body;
+    if (username === STAFF_USER.username && password === STAFF_USER.password) {
+        req.session.isStaff = true;
+        return res.redirect('/staff');
+    }
+    res.send(`
+        <div style="font-family: system-ui; text-align: center; padding-top: 50px;">
+            <h3 style="color: #ef4444;">Invalid Staff Credentials!</h3>
+            <a href="/stafflogin" style="color: #2563eb;">Return to Staff Login</a>
+        </div>
+    `);
+});
+
+
+app.get('/staff-logout', (req, res) => {
+    req.session.isStaff = false;
+    res.redirect('/stafflogin');
+});
+
+// DITO PARA MA CHECK YUNG MGA STUDENT DATA FROM MONGODB
+app.get('/api/staff/students', requireStaffLogin, async (req, res) => {
+    try {
+        const students = await Student.find();
+        const formattedStudents = await Promise.all(students.map(async (s) => {
+            const tx = await Transaction.findOne({ studentId: s.studentId });
+            return {
+                id: s._id.toString(),
+                fullName: s.fullName,
+                studentId: s.studentId,
+                course: s.course,
+                email: s.email,
+                isCleared: s.isCleared,
+                hasEntered: s.hasEntered || false,
+                entryTime: s.entryTime || null,
+                paymentStatus: tx ? tx.status : 'Unpaid',
+                referenceNo: tx ? tx.referenceNo : 'N/A'
+            };
+        }));
+        res.json(formattedStudents);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch student data for staff dashboard" });
+    }
+});
+
+// STAFF API CLEARANCE CHECK
+app.post('/api/staff/set-clearance', requireStaffLogin, async (req, res) => {
+    try {
+        const { id, isCleared } = req.body;
+        const student = await Student.findById(id);
+
+        if (!student) {
+            return res.status(404).json({ success: false, message: "Student not found" });
+        }
+
+        student.isCleared = isCleared;
+        await student.save();
+
+        let studentTx = await Transaction.findOne({ studentId: student.studentId });
+
+        if (studentTx) {
+            studentTx.status = isCleared ? 'Paid' : 'Unpaid';
+            if (isCleared && studentTx.referenceNo.includes('PENDING')) {
+                studentTx.referenceNo = 'TXN-' + Math.floor(100000 + Math.random() * 900000);
+            }
+            studentTx.date = getCurrentFormattedDate();
+            await studentTx.save();
+        } else {
+            await Transaction.create({
+                studentId: student.studentId,
+                description: 'Graduation Fee Payment',
+                referenceNo: isCleared ? ('TXN-' + Math.floor(100000 + Math.random() * 900000)) : 'REF-PENDING',
+                amount: 1500,
+                status: isCleared ? 'Paid' : 'Unpaid',
+                date: getCurrentFormattedDate()
+            });
+        }
+
+        return res.json({ success: true, isCleared: student.isCleared });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// STAFF API TO CONFIRM ENTRY
+app.post('/api/staff/check-in', requireStaffLogin, async (req, res) => {
+    try {
+        const { id } = req.body;
+        const student = await Student.findById(id);
+
+        if (!student) {
+            return res.status(404).json({ success: false, message: "Student record not found." });
+        }
+
+        student.hasEntered = true;
+        student.entryTime = `${getCurrentFormattedDate()} at${getCurrentFormattedTime()}`;
+        await student.save();
+
+        return res.json({
+            success: true,
+            message: `Successfully marked ${student.fullName} as Entered!`,
+            entryTime: student.entryTime
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// STAFF API FOR VERIFICATION
+app.get('/api/staff/verify', requireStaffLogin, async (req, res) => {
+    try {
+        const { query } = req.query;
+        if (!query) {
+            return res.status(400).json({ error: "Search query is required" });
+        }
+
+        const student = await Student.findOne({
+            $or: [
+                { studentId: new RegExp(`^${query}$`, 'i') },
+                { fullName: new RegExp(query, 'i') }
+            ]
+        });
+
+        if (!student) {
+            return res.json({ found: false, message: "No record found for this Student ID or Name." });
+        }
+
+        const tx = await Transaction.findOne({ studentId: student.studentId });
+
+        return res.json({
+            found: true,
+            student: {
+                id: student._id.toString(),
+                studentId: student.studentId,
+                fullName: student.fullName,
+                course: student.course,
+                isCleared: student.isCleared,
+                paymentStatus: tx ? tx.status : 'Unpaid',
+                hasEntered: student.hasEntered || false,
+                entryTime: student.entryTime || null,
+                canEnter: student.isCleared && (tx && tx.status === 'Paid')
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Venue verification server error" });
+    }
+});
+
+
+// ADMIN ROUTES & AUTHENTICATION
+
+app.get('/adminlogin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'adminlogin.html'));
+});
+
+app.get('/admin', requireAdminLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.post('/api/admin/login', (req, res) => {
+    const { username, password } = req.body;
+    if (username === ADMIN_USER.username && password === ADMIN_USER.password) {
+        req.session.isAdmin = true;
+        return res.redirect('/admin');
+    }
+    res.send('<h3>Invalid Admin Credentials! <a href="/adminlogin">Try again</a></h3>');
+});
+
+app.get('/admin-logout', (req, res) => {
+    req.session.isAdmin = false;
+    res.redirect('/adminlogin');
+});
+
+app.get('/api/admin/students', requireAdminLogin, async (req, res) => {
+    try {
+        const students = await Student.find();
+        const formattedStudents = await Promise.all(students.map(async (s) => {
+            const tx = await Transaction.findOne({ studentId: s.studentId });
+            return {
+                id: s._id.toString(),
+                fullName: s.fullName,
+                studentId: s.studentId,
+                course: s.course,
+                email: s.email,
+                isCleared: s.isCleared,
+                hasEntered: s.hasEntered || false,
+                entryTime: s.entryTime || null,
+                paymentStatus: tx ? tx.status : 'Unpaid',
+                referenceNo: tx ? tx.referenceNo : 'N/A'
+            };
+        }));
+        res.json(formattedStudents);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch students" });
+    }
+});
+
+app.post('/api/admin/set-clearance', requireAdminLogin, async (req, res) => {
+    try {
+        const { id, isCleared } = req.body;
+        const student = await Student.findById(id);
+
+        if (!student) {
+            return res.status(404).json({ success: false, message: "Student not found" });
+        }
+
+        student.isCleared = isCleared;
+        await student.save();
+
+        let studentTx = await Transaction.findOne({ studentId: student.studentId });
+
+        if (studentTx) {
+            studentTx.status = isCleared ? 'Paid' : 'Unpaid';
+            if (isCleared && studentTx.referenceNo.includes('PENDING')) {
+                studentTx.referenceNo = 'TXN-' + Math.floor(100000 + Math.random() * 900000);
+            }
+            studentTx.date = getCurrentFormattedDate();
+            await studentTx.save();
+        } else {
+            await Transaction.create({
+                studentId: student.studentId,
+                description: 'Graduation Fee Payment',
+                referenceNo: isCleared ? ('TXN-' + Math.floor(100000 + Math.random() * 900000)) : 'REF-PENDING',
+                amount: 1500,
+                status: isCleared ? 'Paid' : 'Unpaid',
+                date: getCurrentFormattedDate()
+            });
+        }
+
+        return res.json({ success: true, isCleared: student.isCleared });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.delete('/api/admin/student/:id', requireAdminLogin, async (req, res) => {
+    try {
+        const studentId = req.params.id;
+        const student = await Student.findByIdAndDelete(studentId);
+
+        if (student) {
+            await Transaction.deleteMany({ studentId: student.studentId });
+            return res.json({ success: true, message: "Student account erased." });
+        }
+
+        res.status(404).json({ success: false, message: "Student record not found." });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+
+// STUDENT ROUTES & AUTHENTICATION
+
+app.post('/api/signup', async (req, res) => {
+    try {
+        const { firstName, lastName, studentId, course, email, password } = req.body;
+        const existingStudent = await Student.findOne({ email });
+
+        if (existingStudent) {
+            return res.send('<h3>Email already registered! <a href="/login.html">Login here</a></h3>');
+        }
+
+        const fullName = `${firstName}${lastName}`.trim();
+
+        const newStudent = await Student.create({
+            fullName,
+            studentId,
+            course,
+            email,
+            password,
+            isCleared: false
+        });
+
+        await Transaction.create({
+            studentId: newStudent.studentId,
+            description: 'Graduation Fee Assessment',
+            referenceNo: 'REF-PENDING',
+            amount: 1500,
+            status: 'Unpaid',
+            date: getCurrentFormattedDate()
+        });
+
+        req.session.user = { id: newStudent._id.toString(), email: newStudent.email };
+        res.redirect('/dashboard');
+    } catch (error) {
+        res.status(500).send(`Error creating account: ${error.message}`);
+    }
+});
+
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const student = await Student.findOne({ email, password });
+
+        if (!student) {
+            return res.send('<h3>Invalid credentials! <a href="/login.html">Try again</a></h3>');
+        }
+
+        req.session.user = { id: student._id.toString(), email: student.email };
+        res.redirect('/dashboard');
+    } catch (error) {
+        res.status(500).send('Login error');
+    }
+});
+
+app.get('/dashboard', requireStudentLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+app.get('/api/student/transactions', requireStudentLogin, async (req, res) => {
+    try {
+        const student = await Student.findById(req.session.user.id);
+        if (!student) return res.status(404).json({ error: "Student not found" });
+
+        const studentTransactions = await Transaction.find({ studentId: student.studentId });
+        res.json(studentTransactions);
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+app.get('/api/student/me', requireStudentLogin, async (req, res) => {
+    try {
+        const student = await Student.findById(req.session.user.id);
+        if (!student) return res.status(404).json({ error: "Student record not found" });
+
+        let qrImageBase64 = null;
+        if (student.isCleared) {
+            const qrPayload = `Welcome to the Graduation Venue! Graduating Student: ${student.fullName} (ID: ${student.studentId}, Course:${student.course}). Status: Confirmed Graduate & Officially on the List.`;
+            qrImageBase64 = await QRCode.toDataURL(qrPayload);
+        }
+
+        res.json({
+            student: {
+                id: student._id.toString(),
+                fullName: student.fullName,
+                studentId: student.studentId,
+                course: student.course,
+                email: student.email,
+                isCleared: student.isCleared
+            },
+            qrImageBase64
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+app.post('/api/student/companion-qr', requireStudentLogin, async (req, res) => {
+    try {
+        const student = await Student.findById(req.session.user.id);
+        const { companionName } = req.body;
+
+        if (!student || !student.isCleared) {
+            return res.status(403).json({ error: "Unauthorized" });
+        }
+
+        const companionPayload = `Welcome to the Graduation Venue! Guest (Plus 1): ${companionName}. Accompanying Student: ${student.fullName} (${student.studentId}). Status: Verified Guest & Officially on the List.`;
+        const companionQrBase64 = await QRCode.toDataURL(companionPayload);
+
+        res.json({ success: true, companionQrBase64 });
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+app.get('/pay', requireStudentLogin, async (req, res) => {
+    try {
+        const student = await Student.findById(req.session.user.id);
+        if (!student) return res.redirect('/login.html');
+
+        res.send(`
+            <div style="font-family: Arial; padding: 40px; max-width: 400px; margin: auto; border: 1px solid #ccc; border-radius: 8px; margin-top: 40px;">
+                <h2 style="text-align: center;">Graduation Fee Checkout</h2>
+                <p><strong>Student:</strong> ${student.fullName}</p>
+                <p><strong>ID Number:</strong> ${student.studentId}</p>
+                <p><strong>Course:</strong> ${student.course || 'N/A'}</p>
+                <p><strong>Fee:</strong> ₱1,500.00</p>
+                <hr/>
+                <h4>Choose Payment Method:</h4>
+                <button onclick="window.location.href='/payment-success?studentId=${student._id}'" style="width: 100%; padding: 12px; background: #007bf5; color: white; border: none; margin-bottom: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    Pay with GCash (Simulate Success)
+                </button>
+                <button onclick="window.location.href='/payment-success?studentId=${student._id}'" style="width: 100%; padding: 12px; background: #22b14c; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    Pay with Maya (Simulate Success)
+                </button>
+                <br/><br/>
+                <a href="/dashboard">Back to Dashboard</a>
+            </div>
+        `);
+    } catch (error) {
+        res.status(500).send("Error loading checkout");
+    }
+});
+
+app.get('/payment-success', async (req, res) => {
+    try {
+        const { studentId } = req.query;
+        const student = await Student.findById(studentId);
+
+        if (student) {
+            student.isCleared = true;
+            await student.save();
+
+            let studentTx = await Transaction.findOne({ studentId: student.studentId });
+
+            if (studentTx) {
+                studentTx.status = 'Paid';
+                studentTx.referenceNo = 'PAY-' + Math.floor(100000 + Math.random() * 900000);
+                studentTx.date = getCurrentFormattedDate();
+                await studentTx.save();
+            } else {
+                await Transaction.create({
+                    studentId: student.studentId,
+                    description: 'Graduation Fee Payment',
+                    referenceNo: 'PAY-' + Math.floor(100000 + Math.random() * 900000),
+                    amount: 1500,
+                    status: 'Paid',
+                    date: getCurrentFormattedDate()
+                });
+            }
+        }
+        res.redirect('/dashboard');
+    } catch (error) {
+        res.status(500).send("Payment processing error");
+    }
+});
+
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/login.html');
+});
+
+app.listen(3000, () => {
+    console.log('Server active at http://localhost:3000/login.html');
+});
